@@ -1,0 +1,9 @@
+/* Main stylesheet - Modularized imports */
+
+/* Import all CSS modules */
+@import "./styles/variables.css";
+@import "./styles/layout.css";
+@import "./styles/card.css";
+@import "./styles/button.css";
+@import "./styles/modal.css";
+@import "./styles/links.css";
