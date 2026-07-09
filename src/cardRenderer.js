@@ -3,7 +3,6 @@ import {
   formatDate,
   extractContent,
   getImageUrl,
-  processText,
   escapeHtml,
 } from "./utils.js";
 
@@ -14,7 +13,7 @@ function openPermalink(permalink) {
 
 // Create photo card layout
 export function createPhotoCard(post) {
-  const { title, description } = extractContent(post.message);
+  const { title } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
   const imageUrl = getImageUrl(post);
   const permalink = post.permalink_url || "#";
@@ -23,9 +22,6 @@ export function createPhotoCard(post) {
   const likes = post.reactions?.summary?.total_count || 0;
   const comments = post.comments?.summary?.total_count || 0;
   const shares = post.shares?.count || 0;
-
-  // Process description to include links
-  const processedDescription = processText(description);
 
   const card = document.createElement("div");
   card.className = "fb-card";
@@ -57,19 +53,12 @@ export function createPhotoCard(post) {
       <div class="fb-card__content" data-icon="false" data-type="Default">
         <div class="fb-card__text">
           <div class="fb-card__title-row">
-            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}</a>
+            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}...</a>
           </div>
-          ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
         </div>
       </div>
     </div>
   `;
-
-  // Insert processed description with HTML if it exists
-  if (processedDescription) {
-    card.querySelector(".fb-card__description").innerHTML =
-      processedDescription;
-  }
 
   // Card click handler: open permalink when clicking non-link card areas
   card.addEventListener("click", (e) => {
@@ -91,7 +80,7 @@ export function createPhotoCard(post) {
 
 // Create text-only card layout
 export function createTextCard(post) {
-  const { title, description } = extractContent(post.message);
+  const { title } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
   const permalink = post.permalink_url || "#";
 
@@ -99,9 +88,6 @@ export function createTextCard(post) {
   const likes = post.reactions?.summary?.total_count || 0;
   const comments = post.comments?.summary?.total_count || 0;
   const shares = post.shares?.count || 0;
-
-  // Process description to include links
-  const processedDescription = processText(description);
 
   const card = document.createElement("div");
   card.className = "fb-card";
@@ -130,19 +116,12 @@ export function createTextCard(post) {
       <div class="fb-card__content" data-icon="false" data-type="Default">
         <div class="fb-card__text">
           <div class="fb-card__title-row">
-            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}</a>
+            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}...</a>
           </div>
-          ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
         </div>
       </div>
     </div>
   `;
-
-  // Insert processed description with HTML if it exists
-  if (processedDescription) {
-    card.querySelector(".fb-card__description").innerHTML =
-      processedDescription;
-  }
 
   // Card click handler: open permalink when clicking non-link card areas
   card.addEventListener("click", (e) => {

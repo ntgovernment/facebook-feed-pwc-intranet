@@ -113,6 +113,29 @@ export function removeEmojis(text) {
     .trim();
 }
 
+const MIN_TITLE_WORDS = 5;
+
+function countWords(text) {
+  if (!text) return 0;
+  const matches = text.trim().match(/[a-zA-Z0-9]+(?:['’-][a-zA-Z0-9]+)*/g);
+  return matches ? matches.length : 0;
+}
+
+function selectTitleMarker(text, markers) {
+  const sortedMarkers = markers
+    .filter((marker) => marker.index > 0)
+    .sort((a, b) => a.index - b.index);
+
+  for (const marker of sortedMarkers) {
+    const candidateTitle = text.substring(0, marker.index).trim();
+    if (countWords(candidateTitle) >= MIN_TITLE_WORDS) {
+      return marker;
+    }
+  }
+
+  return null;
+}
+
 // Helper: Extract title from caption (first line or sentence)
 export function extractTitle(caption) {
   if (!caption) return "View post";
@@ -133,36 +156,26 @@ export function extractTitle(caption) {
 
   if (startsWithNonAlpha) {
     // For quoted or special text, extract only first sentence
-    const periodIndex = cleaned.indexOf(".");
-    const exclamationIndex = cleaned.indexOf("!");
-    const questionIndex = cleaned.indexOf("?");
+    const selectedMarker = selectTitleMarker(cleaned, [
+      { index: cleaned.indexOf("."), skipLength: 1 },
+      { index: cleaned.indexOf("!"), skipLength: 1 },
+      { index: cleaned.indexOf("?"), skipLength: 1 },
+    ]);
 
-    // Find first valid punctuation mark
-    const validIndices = [periodIndex, exclamationIndex, questionIndex].filter(
-      (idx) => idx > 0,
-    );
-
-    if (validIndices.length > 0) {
-      endIndex = Math.min(...validIndices);
+    if (selectedMarker) {
+      endIndex = selectedMarker.index;
     }
   } else {
     // For normal text, find first terminator (punctuation or double newline)
-    const periodIndex = cleaned.indexOf(".");
-    const exclamationIndex = cleaned.indexOf("!");
-    const questionIndex = cleaned.indexOf("?");
-    const doubleNewlineIndex = cleaned.indexOf("\n\n");
+    const selectedMarker = selectTitleMarker(cleaned, [
+      { index: cleaned.indexOf("."), skipLength: 1 },
+      { index: cleaned.indexOf("!"), skipLength: 1 },
+      { index: cleaned.indexOf("?"), skipLength: 1 },
+      { index: cleaned.indexOf("\n\n"), skipLength: 2 },
+    ]);
 
-    // Collect all valid terminators
-    const validIndices = [
-      periodIndex,
-      exclamationIndex,
-      questionIndex,
-      doubleNewlineIndex,
-    ].filter((idx) => idx > 0);
-
-    if (validIndices.length > 0) {
-      // Use the first terminator found
-      endIndex = Math.min(...validIndices);
+    if (selectedMarker) {
+      endIndex = selectedMarker.index;
     } else {
       // Fallback to first line
       const firstNewline = cleaned.indexOf("\n");
@@ -199,42 +212,33 @@ export function truncateText(text, maxLength = 150) {
 
   if (startsWithNonAlpha) {
     // For quoted text, title is just first sentence
-    const periodIndex = originalCleaned.indexOf(".");
-    const exclamationIndex = originalCleaned.indexOf("!");
-    const questionIndex = originalCleaned.indexOf("?");
+    const selectedMarker = selectTitleMarker(originalCleaned, [
+      { index: originalCleaned.indexOf("."), skipLength: 1 },
+      { index: originalCleaned.indexOf("!"), skipLength: 1 },
+      { index: originalCleaned.indexOf("?"), skipLength: 1 },
+    ]);
 
-    // Find first valid punctuation mark
-    const validIndices = [periodIndex, exclamationIndex, questionIndex].filter(
-      (idx) => idx > 0,
-    );
-
-    if (validIndices.length > 0) {
-      titleEndIndex = Math.min(...validIndices) + 1;
+    if (selectedMarker) {
+      titleEndIndex = selectedMarker.index + selectedMarker.skipLength;
       cleaned = originalCleaned.substring(titleEndIndex).trim();
     } else {
       return "";
     }
   } else {
     // For normal text, find first terminator (punctuation or double newline)
-    const periodIndex = originalCleaned.indexOf(".");
-    const exclamationIndex = originalCleaned.indexOf("!");
-    const questionIndex = originalCleaned.indexOf("?");
-    const doubleNewlineIndex = originalCleaned.indexOf("\n\n");
+    const selectedMarker = selectTitleMarker(originalCleaned, [
+      { index: originalCleaned.indexOf("."), skipLength: 1 },
+      { index: originalCleaned.indexOf("!"), skipLength: 1 },
+      { index: originalCleaned.indexOf("?"), skipLength: 1 },
+      { index: originalCleaned.indexOf("\n\n"), skipLength: 2 },
+    ]);
 
-    // Collect all valid terminators
-    const validIndices = [
-      periodIndex,
-      exclamationIndex,
-      questionIndex,
-      doubleNewlineIndex,
-    ].filter((idx) => idx > 0);
-
-    if (validIndices.length > 0) {
-      // Use the first terminator found
-      titleEndIndex = Math.min(...validIndices);
-      // Skip past the terminator (and extra newline if double newline)
-      const skipLength = titleEndIndex === doubleNewlineIndex ? 2 : 1;
-      cleaned = originalCleaned.substring(titleEndIndex + skipLength).trim();
+    if (selectedMarker) {
+      // Skip past the selected terminator
+      titleEndIndex = selectedMarker.index;
+      cleaned = originalCleaned
+        .substring(titleEndIndex + selectedMarker.skipLength)
+        .trim();
     } else {
       const firstNewline = originalCleaned.indexOf("\n");
       if (firstNewline > 0) {
