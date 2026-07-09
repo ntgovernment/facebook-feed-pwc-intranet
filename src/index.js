@@ -9,6 +9,24 @@ console.log("Facebook Feed Agency Internet - Loaded!");
 // State management
 let filteredPosts = [];
 
+function normalizePostsData(payload) {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload?.data && Array.isArray(payload.data)) {
+    return payload.data;
+  }
+
+  return null;
+}
+
+function hasRenderableFeedMarkup(widget) {
+  return Boolean(
+    widget.querySelector(".fb-feed__grid, .fb-card, .fb-feed__empty"),
+  );
+}
+
 // Fetch posts from API
 async function fetchPosts(apiUrl) {
   try {
@@ -61,7 +79,7 @@ async function initializeWidget() {
   const widget = document.querySelector("[data-securent-fb-widget]");
   if (!widget) return;
 
-  const hasInitialContent = widget.childElementCount > 0;
+  const hasRetainableMarkup = hasRenderableFeedMarkup(widget);
 
   // Extract configuration
   const apiUrl = widget.dataset.apiUrl || "";
@@ -82,24 +100,12 @@ async function initializeWidget() {
   // Try to fetch from API if URL is provided (production)
   if (apiUrl) {
     console.log("Fetching posts from API:", apiUrl);
-    postsData = await fetchPosts(apiUrl);
-    // Normalize data structure if API returns { data: [...] }
-    if (postsData?.data && Array.isArray(postsData.data)) {
-      postsData = postsData.data;
-    } else if (!Array.isArray(postsData)) {
-      postsData = null;
-    }
+    postsData = normalizePostsData(await fetchPosts(apiUrl));
   }
 
   // Try fallback URL if primary API failed
   if (!postsData && fallbackUrl) {
-    postsData = await fetchPosts(fallbackUrl);
-    // Normalize data structure if API returns { data: [...] }
-    if (postsData?.data && Array.isArray(postsData.data)) {
-      postsData = postsData.data;
-    } else if (!Array.isArray(postsData)) {
-      postsData = null;
-    }
+    postsData = normalizePostsData(await fetchPosts(fallbackUrl));
   }
 
   // Use local mock data only for localhost or when explicitly enabled.
@@ -125,7 +131,7 @@ async function initializeWidget() {
   }
 
   // In production, preserve existing server-rendered cards when runtime fetch fails.
-  if (!hasUsableFeedData && hasInitialContent && !enableMockFallback) {
+  if (!hasUsableFeedData && hasRetainableMarkup && !enableMockFallback) {
     console.warn(
       "Retaining existing feed markup because runtime API data was unavailable.",
     );
