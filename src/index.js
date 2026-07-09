@@ -21,6 +21,10 @@ function normalizePostsData(payload) {
   return null;
 }
 
+function getLocalFallbackPosts() {
+  return Array.isArray(facebookData) ? facebookData : facebookData?.data;
+}
+
 function hasRenderableFeedMarkup(widget) {
   return Boolean(
     widget.querySelector(".fb-feed__grid, .fb-card, .fb-feed__empty"),
@@ -113,7 +117,19 @@ async function initializeWidget() {
     console.warn(
       "Using mock data from data.json (localhost or enableMockFallback=true)",
     );
-    postsData = Array.isArray(facebookData) ? facebookData : facebookData?.data;
+    postsData = getLocalFallbackPosts();
+  }
+
+  // If remote sources are unavailable in production, fall back to the bundled snapshot
+  // so the widget still renders something useful instead of showing an error state.
+  if (!postsData) {
+    const localFallbackPosts = getLocalFallbackPosts();
+    if (Array.isArray(localFallbackPosts) && localFallbackPosts.length > 0) {
+      console.warn(
+        "Using bundled local snapshot because remote feed data was unavailable.",
+      );
+      postsData = localFallbackPosts;
+    }
   }
 
   if (!postsData && !enableMockFallback) {

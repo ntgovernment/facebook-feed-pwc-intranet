@@ -55,8 +55,9 @@ Each post is expected to include:
 
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
-1. If the widget already contains valid pre-rendered feed markup, existing markup is retained.
-2. If the widget has no valid pre-rendered feed markup, the widget is cleared and an empty/error state is shown.
+1. The widget falls back to the bundled `src/data.json` snapshot so posts still render.
+2. If the bundled snapshot is unavailable or empty, existing valid pre-rendered feed markup is retained.
+3. If there is no valid pre-rendered feed markup, the widget is cleared and an empty/error state is shown.
 
 Valid retained markup means existing content that already looks like a rendered feed, such as `.fb-feed__grid`, `.fb-card`, or `.fb-feed__empty`. Arbitrary initial child markup is not preserved.
 
@@ -67,7 +68,8 @@ If the console shows `Invalid posts data format: null` or `No usable feed data r
 1. Confirm the live API response matches one of the accepted top-level shapes above.
 2. Confirm `data-api-url` and `data-fallback-url` are not pointing to the same broken endpoint unless that duplication is intentional.
 3. Confirm the deployed bundle matches the current build output in `dist/bundle.js`.
-4. Confirm any pre-rendered fallback markup is valid feed markup, not escaped widget snippet text.
+4. Confirm the bundled `src/data.json` snapshot still contains valid post objects if remote feeds are unavailable.
+5. Confirm any pre-rendered fallback markup is valid feed markup, not escaped widget snippet text.
 
 ### Build
 
