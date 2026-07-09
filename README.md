@@ -27,7 +27,8 @@ At runtime the widget attempts to load feed data in this order:
 
 1. `data-api-url`
 2. `data-fallback-url`
-3. Local `src/data.json` fallback (only when enabled)
+3. Recovered widget config from the page source, when the live DOM is missing usable `data-*` attributes
+4. Local `src/data.json` fallback (only when enabled)
 
 Local `data.json` fallback is enabled automatically when served from localhost (`localhost`, `127.0.0.1`, or `::1`).
 
@@ -61,6 +62,8 @@ If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
 Valid retained markup means existing content that already looks like a rendered feed, such as `.fb-feed__grid`, `.fb-card`, or `.fb-feed__empty`. Arbitrary initial child markup is not preserved.
 
+If the live page source contains malformed widget markup, the loader tries to recover the feed settings directly from the raw HTML before it gives up on the remote request. This is a defensive fallback for CMS-rendered pages where an unescaped `data-content` attribute can break DOM parsing.
+
 ### Troubleshooting
 
 If the console shows `Invalid posts data format: null` or `No usable feed data returned from API/fallback URL`, check these items first:
@@ -70,6 +73,7 @@ If the console shows `Invalid posts data format: null` or `No usable feed data r
 3. Confirm the deployed bundle matches the current build output in `dist/bundle.js`.
 4. Confirm the bundled `src/data.json` snapshot still contains valid post objects if remote feeds are unavailable.
 5. Confirm any pre-rendered fallback markup is valid feed markup, not escaped widget snippet text.
+6. If the feed never logs `Fetching posts from API:`, inspect the rendered page source for broken `data-*` attributes or unescaped HTML inside `data-content`.
 
 ### Build
 

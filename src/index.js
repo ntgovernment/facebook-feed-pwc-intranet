@@ -25,6 +25,41 @@ function getLocalFallbackPosts() {
   return Array.isArray(facebookData) ? facebookData : facebookData?.data;
 }
 
+function extractWidgetAttribute(markup, attributeName) {
+  const match = markup.match(
+    new RegExp(`data-${attributeName}\\s*=\\s*"([^"]*)"`, "i"),
+  );
+
+  return match ? match[1] : "";
+}
+
+async function recoverWidgetConfigFromPageSource() {
+  try {
+    const response = await fetch(window.location.href, {
+      credentials: "same-origin",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const markup = await response.text();
+
+    return {
+      apiUrl: extractWidgetAttribute(markup, "api-url"),
+      fallbackUrl: extractWidgetAttribute(markup, "fallback-url"),
+      startDate: extractWidgetAttribute(markup, "start-date"),
+      endDate: extractWidgetAttribute(markup, "end-date"),
+      filterKeywords: extractWidgetAttribute(markup, "filter-keywords"),
+      cardSize: extractWidgetAttribute(markup, "card-size"),
+      enableMockFallback: extractWidgetAttribute(markup, "enable-mock-fallback"),
+    };
+  } catch (error) {
+    console.warn("Unable to recover widget config from page source:", error);
+    return null;
+  }
+}
+
 function hasRenderableFeedMarkup(widget) {
   return Boolean(
     widget.querySelector(".fb-feed__grid, .fb-card, .fb-feed__empty"),
@@ -85,18 +120,27 @@ async function initializeWidget() {
 
   const hasRetainableMarkup = hasRenderableFeedMarkup(widget);
 
+  const recoveredConfig =
+    !widget.dataset.apiUrl || !widget.dataset.fallbackUrl
+      ? await recoverWidgetConfigFromPageSource()
+      : null;
+
   // Extract configuration
-  const apiUrl = widget.dataset.apiUrl || "";
-  const fallbackUrl = widget.dataset.fallbackUrl || "";
-  const startDate = widget.dataset.startDate || "";
-  const endDate = widget.dataset.endDate || "";
-  const filterKeywords = widget.dataset.filterKeywords || "";
-  const cardSize = widget.dataset.cardSize || "compact";
+  const apiUrl = widget.dataset.apiUrl || recoveredConfig?.apiUrl || "";
+  const fallbackUrl =
+    widget.dataset.fallbackUrl || recoveredConfig?.fallbackUrl || "";
+  const startDate = widget.dataset.startDate || recoveredConfig?.startDate || "";
+  const endDate = widget.dataset.endDate || recoveredConfig?.endDate || "";
+  const filterKeywords =
+    widget.dataset.filterKeywords || recoveredConfig?.filterKeywords || "";
+  const cardSize = widget.dataset.cardSize || recoveredConfig?.cardSize || "compact";
   const host = window.location.hostname;
   const isLocalhost =
     host === "localhost" || host === "127.0.0.1" || host === "::1";
   const enableMockFallback =
-    widget.dataset.enableMockFallback === "true" || isLocalhost;
+    widget.dataset.enableMockFallback === "true" ||
+    recoveredConfig?.enableMockFallback === "true" ||
+    isLocalhost;
 
   let postsData = null;
   let hasUsableFeedData = false;
