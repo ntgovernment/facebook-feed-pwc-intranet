@@ -35,15 +35,15 @@ export function createPhotoCard(post) {
       <div class="fb-card__header" data-show-date="true" data-show-tag="true">
         <div class="fb-card__engagement">
           <div class="fb-card__stat">
-            <i class="${likes > 0 ? "far" : "fal"} fa-thumbs-up fb-card__icon${likes === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive"></i>
             ${likes > 0 ? `<span class="fb-card__count">${likes}</span>` : ""}
           </div>
           <div class="fb-card__stat">
-            <i class="${comments > 0 ? "far" : "fal"} fa-comment fb-card__icon fb-card__icon--flipped${comments === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive"></i>
             ${comments > 0 ? `<span class="fb-card__count">${comments}</span>` : ""}
           </div>
           <div class="fb-card__stat">
-            <i class="${shares > 0 ? "far" : "fal"} fa-share fb-card__icon${shares === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-share fb-card__icon fb-card__icon--inactive"></i>
             ${shares > 0 ? `<span class="fb-card__count">${shares}</span>` : ""}
           </div>
         </div>
@@ -112,15 +112,15 @@ export function createTextCard(post) {
       <div class="fb-card__header" data-show-date="true" data-show-tag="true">
         <div class="fb-card__engagement">
           <div class="fb-card__stat">
-            <i class="${likes > 0 ? "far" : "fal"} fa-thumbs-up fb-card__icon${likes === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive"></i>
             ${likes > 0 ? `<span class="fb-card__count">${likes}</span>` : ""}
           </div>
           <div class="fb-card__stat">
-            <i class="${comments > 0 ? "far" : "fal"} fa-comment fb-card__icon fb-card__icon--flipped${comments === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive"></i>
             ${comments > 0 ? `<span class="fb-card__count">${comments}</span>` : ""}
           </div>
           <div class="fb-card__stat">
-            <i class="${shares > 0 ? "far" : "fal"} fa-share fb-card__icon${shares === 0 ? " fb-card__icon--inactive" : ""}"></i>
+            <i class="fal fa-share fb-card__icon fb-card__icon--inactive"></i>
             ${shares > 0 ? `<span class="fb-card__count">${shares}</span>` : ""}
           </div>
         </div>

@@ -52,6 +52,8 @@ Semantic text color variables:
 --clr-text-default: #1f1e27; /* Default body text */
 ```
 
+The feed uses `--dpsc-text-light` for intentionally muted UI details such as engagement icons and counts.
+
 #### 5. UI Colors
 
 Background and border colors:
@@ -228,6 +230,12 @@ Follows Bootstrap 4's button state architecture:
   opacity: var(--btn-disabled-opacity);
 }
 ```
+
+## Engagement Icon Treatment
+
+The feed card and modal engagement rows reuse the `.fb-card__icon` and `.fb-card__icon--inactive` classes from [src/styles/card.css](src/styles/card.css).
+
+`fb-card__icon--inactive` is not limited to zero-value states. In the current widget design it is also applied intentionally to like, comment, and share icons even when engagement counts are present, keeping those icons visually subdued while leaving the numeric counts readable.
 
 ## Customization Guide
 

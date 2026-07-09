@@ -81,6 +81,12 @@ Each post is expected to include:
 - `full_picture` or `attachments.data[0].media.image.src` for image cards
 - Optional engagement fields such as `reactions.summary.total_count`, `comments.summary.total_count`, and `shares.count`
 
+### Engagement Display
+
+The widget renders like, comment, and share counts when those values are present in the feed data.
+
+The corresponding engagement icons are intentionally shown in the muted/inactive visual style for all posts, regardless of whether the counts are zero or greater than zero. This is the expected behaviour for both feed cards and the post modal.
+
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
 1. The widget falls back to the bundled `src/data.json` snapshot so posts still render.
