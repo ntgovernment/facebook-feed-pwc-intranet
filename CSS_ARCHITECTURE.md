@@ -338,6 +338,8 @@ Uses variables:
 
 ### Modal Component ([`modal.css`](src/styles/modal.css))
 
+Note: modal styles are currently legacy. Feed card interactions now navigate directly to post permalinks and do not render the modal at runtime.
+
 Structure:
 
 ```
@@ -490,7 +492,7 @@ CSS Custom Properties are widely supported (95%+ global coverage).
 
 1. Check if a variable exists before hard-coding
 2. Test changes across all breakpoints
-3. Verify modal and card components still function
+3. Verify active feed components still function (cards, links, and layout)
 4. Check focus states for accessibility
 
 ### Performance Considerations
@@ -525,7 +527,7 @@ All color combinations meet WCAG AA standards:
 ### Keyboard Navigation
 
 - All buttons and links are keyboard accessible
-- Modal includes focus trap
+- Card keyboard activation (`Enter`/`Space`) opens the post permalink in a new tab
 - Tab order follows visual hierarchy
 
 ## Migration from Legacy Code

@@ -6,13 +6,18 @@ import {
   processText,
   escapeHtml,
 } from "./utils.js";
-import { showPostModal } from "./modal.js";
+
+function openPermalink(permalink) {
+  if (!permalink || permalink === "#") return;
+  window.open(permalink, "_blank", "noopener,noreferrer");
+}
 
 // Create photo card layout
 export function createPhotoCard(post) {
   const { title, description } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
   const imageUrl = getImageUrl(post);
+  const permalink = post.permalink_url || "#";
 
   // Get engagement stats
   const likes = post.reactions?.summary?.total_count || 0;
@@ -26,7 +31,7 @@ export function createPhotoCard(post) {
   card.className = "fb-card";
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `View post: ${escapeHtml(title)}`);
+  card.setAttribute("aria-label", `Open post: ${escapeHtml(title)}`);
   card.innerHTML = `
     <div class="fb-card__inner" data-footer="false" data-header="true" data-rich-media="true">
       <div class="fb-card__image" data-ratio="16:9" style="background-image: url('${imageUrl}')">
@@ -52,7 +57,7 @@ export function createPhotoCard(post) {
       <div class="fb-card__content" data-icon="false" data-type="Default">
         <div class="fb-card__text">
           <div class="fb-card__title-row">
-            <a href="#" class="fb-card__title fb-card__title--link" tabindex="-1">${escapeHtml(title)}</a>
+            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}</a>
           </div>
           ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
         </div>
@@ -66,15 +71,10 @@ export function createPhotoCard(post) {
       processedDescription;
   }
 
-  card.querySelector(".fb-card__title--link").addEventListener("click", (e) => {
-    e.preventDefault();
-    showPostModal(post, card);
-  });
-
-  // Card click handler
+  // Card click handler: open permalink when clicking non-link card areas
   card.addEventListener("click", (e) => {
-    if (!e.target.closest(".fb-card__title--link")) {
-      showPostModal(post, card);
+    if (!e.target.closest("a")) {
+      openPermalink(permalink);
     }
   });
 
@@ -82,7 +82,7 @@ export function createPhotoCard(post) {
   card.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      showPostModal(post, card);
+      openPermalink(permalink);
     }
   });
 
@@ -93,6 +93,7 @@ export function createPhotoCard(post) {
 export function createTextCard(post) {
   const { title, description } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
+  const permalink = post.permalink_url || "#";
 
   // Get engagement stats
   const likes = post.reactions?.summary?.total_count || 0;
@@ -106,7 +107,7 @@ export function createTextCard(post) {
   card.className = "fb-card";
   card.setAttribute("tabindex", "0");
   card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `View post: ${escapeHtml(title)}`);
+  card.setAttribute("aria-label", `Open post: ${escapeHtml(title)}`);
   card.innerHTML = `
     <div class="fb-card__inner fb-card__inner--text" data-footer="false" data-header="true" data-rich-media="false">
       <div class="fb-card__header" data-show-date="true" data-show-tag="true">
@@ -129,7 +130,7 @@ export function createTextCard(post) {
       <div class="fb-card__content" data-icon="false" data-type="Default">
         <div class="fb-card__text">
           <div class="fb-card__title-row">
-            <a href="#" class="fb-card__title fb-card__title--link" tabindex="-1">${escapeHtml(title)}</a>
+            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-card__title fb-card__title--link">${escapeHtml(title)}</a>
           </div>
           ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
         </div>
@@ -143,15 +144,10 @@ export function createTextCard(post) {
       processedDescription;
   }
 
-  card.querySelector(".fb-card__title--link").addEventListener("click", (e) => {
-    e.preventDefault();
-    showPostModal(post, card);
-  });
-
-  // Card click handler
+  // Card click handler: open permalink when clicking non-link card areas
   card.addEventListener("click", (e) => {
-    if (!e.target.closest(".fb-card__title--link")) {
-      showPostModal(post, card);
+    if (!e.target.closest("a")) {
+      openPermalink(permalink);
     }
   });
 
@@ -159,7 +155,7 @@ export function createTextCard(post) {
   card.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      showPostModal(post, card);
+      openPermalink(permalink);
     }
   });
 

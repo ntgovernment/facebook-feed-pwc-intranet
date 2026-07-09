@@ -85,7 +85,19 @@ Each post is expected to include:
 
 The widget renders like, comment, and share counts when those values are present in the feed data.
 
-The corresponding engagement icons are intentionally shown in the muted/inactive visual style for all posts, regardless of whether the counts are zero or greater than zero. This is the expected behaviour for both feed cards and the post modal.
+The corresponding engagement icons are intentionally shown in the muted/inactive visual style for all posts, regardless of whether the counts are zero or greater than zero.
+
+### Card Interaction Behavior
+
+The feed no longer renders a post modal.
+
+Current interaction model:
+
+1. Clicking a post title opens the post `permalink_url` in a new browser tab.
+2. Clicking on non-link card content opens the same `permalink_url` in a new browser tab.
+3. Keyboard activation on a focused card (`Enter` or `Space`) opens the same `permalink_url` in a new browser tab.
+
+If `permalink_url` is missing for a post, card activation is ignored for that post.
 
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
