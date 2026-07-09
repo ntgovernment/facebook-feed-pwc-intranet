@@ -21,6 +21,33 @@ npm run dev
 This starts webpack dev server at http://localhost:8000 and serves the page [Facebook feed \_ PWC Intranet.html](Facebook%20feed%20_%20PWC%20Intranet.html).
 Changes in [src](src), [Facebook feed \_ PWC Intranet.html](Facebook%20feed%20_%20PWC%20Intranet.html), and [Facebook feed \_ PWC Intranet_files](Facebook%20feed%20_%20PWC%20Intranet_files) trigger live reload; JavaScript/CSS from webpack uses HMR.
 
+### Widget Host Markup
+
+The widget expects an empty host container that only carries configuration via `data-*` attributes. The runtime owns the rendered feed markup.
+
+Recommended host snippet:
+
+```html
+<section class="facebook-feed my-5">
+	<div
+		data-securent-fb-widget
+		data-title=""
+		data-content=""
+		data-filter-keywords=""
+		data-start-date="2025-01-01"
+		data-end-date="2030-12-31"
+		data-card-size="compact"
+		data-api-url="https://internal.nt.gov.au/pwc/dev/facebook-feeds/facebook-graph-proxy/_nocache"
+		data-fallback-url="https://internal.nt.gov.au/pwc/dev/facebook-feeds/facebook-graph-proxy/_nocache"
+		data-fallback-message=""
+		data-items-per-page="3"
+		data-enable-mock-fallback="false"
+	></div>
+</section>
+```
+
+Avoid shipping escaped widget snippet text or arbitrary child markup inside the host container unless it is intentional pre-rendered feed fallback markup.
+
 ### Feed Data Source Behavior
 
 At runtime the widget attempts to load feed data in this order:
@@ -64,6 +91,8 @@ Valid retained markup means existing content that already looks like a rendered 
 
 If the live page source contains malformed widget markup, the loader tries to recover the feed settings directly from the raw HTML before it gives up on the remote request. This is a defensive fallback for CMS-rendered pages where an unescaped `data-content` attribute can break DOM parsing.
 
+This means the widget can still bootstrap from page-source attributes even when the live DOM is partially broken, but the safest integration is still a clean empty host container.
+
 ### Troubleshooting
 
 If the console shows `Invalid posts data format: null` or `No usable feed data returned from API/fallback URL`, check these items first:
@@ -74,6 +103,13 @@ If the console shows `Invalid posts data format: null` or `No usable feed data r
 4. Confirm the bundled `src/data.json` snapshot still contains valid post objects if remote feeds are unavailable.
 5. Confirm any pre-rendered fallback markup is valid feed markup, not escaped widget snippet text.
 6. If the feed never logs `Fetching posts from API:`, inspect the rendered page source for broken `data-*` attributes or unescaped HTML inside `data-content`.
+
+If raw widget configuration text becomes visible during refresh, check these items first:
+
+1. Confirm the CMS or host page is emitting a real `<div data-securent-fb-widget ...></div>` element, not escaped snippet text.
+2. Confirm the widget host container does not contain stale copied card markup from a saved page snapshot unless you want that markup retained as fallback content.
+3. Confirm any pre-rendered fallback markup is valid feed DOM such as `.fb-feed__grid`, `.fb-card`, or `.fb-feed__empty`.
+4. Confirm the deployed page is loading the current `bundle.js` and `styles.css` assets instead of an older snapshot.
 
 ### Build
 
