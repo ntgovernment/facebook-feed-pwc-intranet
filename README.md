@@ -1,4 +1,4 @@
-# facebook-feed-agency-internet
+# facebook-feed-pwc-intranet
 
 A Webpack-based project that deploys JS and CSS files to be referenced in a web page.
 
@@ -34,13 +34,13 @@ Local `data.json` fallback is enabled automatically when served from localhost (
 For non-local environments, fallback to `src/data.json` is disabled by default and can be enabled explicitly on the widget element:
 
 ```html
-<div
-	data-securent-fb-widget
-	data-enable-mock-fallback="true"
-></div>
+<div data-securent-fb-widget data-enable-mock-fallback="true"></div>
 ```
 
-If API and fallback URL both fail and mock fallback is disabled, the widget shows an empty/error state instead of rendering fixture data.
+If API and fallback URL both fail and mock fallback is disabled, behavior is:
+
+1. If the widget already contains pre-rendered cards, existing markup is retained.
+2. If the widget has no initial content, an empty/error state is shown.
 
 ### Build
 

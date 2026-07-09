@@ -61,8 +61,7 @@ async function initializeWidget() {
   const widget = document.querySelector("[data-securent-fb-widget]");
   if (!widget) return;
 
-  // Clear any baked-in/static card markup so runtime data is authoritative.
-  widget.innerHTML = "";
+  const hasInitialContent = widget.childElementCount > 0;
 
   // Extract configuration
   const apiUrl = widget.dataset.apiUrl || "";
@@ -78,11 +77,11 @@ async function initializeWidget() {
     widget.dataset.enableMockFallback === "true" || isLocalhost;
 
   let postsData = null;
+  let hasUsableFeedData = false;
 
   // Try to fetch from API if URL is provided (production)
   if (apiUrl) {
     console.log("Fetching posts from API:", apiUrl);
-    widget.innerHTML = '<p class="fb-feed__empty">Loading posts...</p>';
     postsData = await fetchPosts(apiUrl);
     // Normalize data structure if API returns { data: [...] }
     if (postsData?.data && Array.isArray(postsData.data)) {
@@ -106,24 +105,34 @@ async function initializeWidget() {
   // Use local mock data only for localhost or when explicitly enabled.
   if (!postsData && enableMockFallback) {
     console.warn(
-      "Using mock data from data.json (localhost or enableMockFallback=true)"
+      "Using mock data from data.json (localhost or enableMockFallback=true)",
     );
     postsData = Array.isArray(facebookData) ? facebookData : facebookData?.data;
   }
 
   if (!postsData && !enableMockFallback) {
     console.error(
-      "No usable feed data returned from API/fallback URL; mock fallback disabled."
+      "No usable feed data returned from API/fallback URL; mock fallback disabled.",
     );
   }
 
   // Ensure postsData is always a valid array
-  if (!postsData || !Array.isArray(postsData)) {
+  if (postsData && Array.isArray(postsData)) {
+    hasUsableFeedData = true;
+  } else {
     console.error("Invalid posts data format:", postsData);
     postsData = [];
   }
 
-  // Clear loading message
+  // In production, preserve existing server-rendered cards when runtime fetch fails.
+  if (!hasUsableFeedData && hasInitialContent && !enableMockFallback) {
+    console.warn(
+      "Retaining existing feed markup because runtime API data was unavailable.",
+    );
+    return;
+  }
+
+  // Replace existing markup only when we have valid feed data (or explicit local fallback).
   widget.innerHTML = "";
 
   // Filter posts
