@@ -42,7 +42,8 @@ function renderCards(container, posts, start, end) {
 // Setup feed and render all posts
 function setupFeed(widget, posts, cardSize) {
   if (posts.length === 0) {
-    widget.innerHTML = '<p class="fb-feed__empty">No posts available.</p>';
+    widget.innerHTML =
+      '<p class="fb-feed__empty">Unable to load Facebook posts right now.</p>';
     return;
   }
 
@@ -60,6 +61,9 @@ async function initializeWidget() {
   const widget = document.querySelector("[data-securent-fb-widget]");
   if (!widget) return;
 
+  // Clear any baked-in/static card markup so runtime data is authoritative.
+  widget.innerHTML = "";
+
   // Extract configuration
   const apiUrl = widget.dataset.apiUrl || "";
   const fallbackUrl = widget.dataset.fallbackUrl || "";
@@ -67,6 +71,11 @@ async function initializeWidget() {
   const endDate = widget.dataset.endDate || "";
   const filterKeywords = widget.dataset.filterKeywords || "";
   const cardSize = widget.dataset.cardSize || "compact";
+  const host = window.location.hostname;
+  const isLocalhost =
+    host === "localhost" || host === "127.0.0.1" || host === "::1";
+  const enableMockFallback =
+    widget.dataset.enableMockFallback === "true" || isLocalhost;
 
   let postsData = null;
 
@@ -94,11 +103,18 @@ async function initializeWidget() {
     }
   }
 
-  // Fall back to mock data if API fetch failed or no URL provided
-  if (!postsData) {
-    console.log("Using mock data from data.json");
-    // data.json can be either a root array or an object with data property
+  // Use local mock data only for localhost or when explicitly enabled.
+  if (!postsData && enableMockFallback) {
+    console.warn(
+      "Using mock data from data.json (localhost or enableMockFallback=true)"
+    );
     postsData = Array.isArray(facebookData) ? facebookData : facebookData?.data;
+  }
+
+  if (!postsData && !enableMockFallback) {
+    console.error(
+      "No usable feed data returned from API/fallback URL; mock fallback disabled."
+    );
   }
 
   // Ensure postsData is always a valid array
