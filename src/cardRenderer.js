@@ -6,11 +6,6 @@ import {
   escapeHtml,
 } from "./utils.js";
 
-function openPermalink(permalink) {
-  if (!permalink || permalink === "#") return;
-  window.open(permalink, "_blank", "noopener,noreferrer");
-}
-
 // Create photo card layout
 export function createPhotoCard(post) {
   const { title } = extractContent(post.message);
@@ -25,9 +20,6 @@ export function createPhotoCard(post) {
 
   const card = document.createElement("div");
   card.className = "fb-card";
-  card.setAttribute("tabindex", "0");
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `Open post: ${escapeHtml(title)}`);
   card.innerHTML = `
     <div class="fb-card__inner" data-footer="false" data-header="true" data-rich-media="true">
       <div class="fb-card__image" data-ratio="16:9" style="background-image: url('${imageUrl}')">
@@ -60,21 +52,6 @@ export function createPhotoCard(post) {
     </div>
   `;
 
-  // Card click handler: open permalink when clicking non-link card areas
-  card.addEventListener("click", (e) => {
-    if (!e.target.closest("a")) {
-      openPermalink(permalink);
-    }
-  });
-
-  // Keyboard handler for accessibility
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openPermalink(permalink);
-    }
-  });
-
   return card;
 }
 
@@ -91,9 +68,6 @@ export function createTextCard(post) {
 
   const card = document.createElement("div");
   card.className = "fb-card";
-  card.setAttribute("tabindex", "0");
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `Open post: ${escapeHtml(title)}`);
   card.innerHTML = `
     <div class="fb-card__inner fb-card__inner--text" data-footer="false" data-header="true" data-rich-media="false">
       <div class="fb-card__header" data-show-date="true" data-show-tag="true">
@@ -122,21 +96,6 @@ export function createTextCard(post) {
       </div>
     </div>
   `;
-
-  // Card click handler: open permalink when clicking non-link card areas
-  card.addEventListener("click", (e) => {
-    if (!e.target.closest("a")) {
-      openPermalink(permalink);
-    }
-  });
-
-  // Keyboard handler for accessibility
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openPermalink(permalink);
-    }
-  });
 
   return card;
 }

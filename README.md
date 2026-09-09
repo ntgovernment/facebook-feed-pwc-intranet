@@ -94,10 +94,11 @@ The feed no longer renders a post modal.
 Current interaction model:
 
 1. Clicking a post title opens the post `permalink_url` in a new browser tab.
-2. Clicking on non-link card content opens the same `permalink_url` in a new browser tab.
-3. Keyboard activation on a focused card (`Enter` or `Space`) opens the same `permalink_url` in a new browser tab.
+2. Keyboard activation on the post title link opens the same `permalink_url` in a new browser tab.
 
-If `permalink_url` is missing for a post, card activation is ignored for that post.
+Clicking the photo, engagement icons, date, or other non-caption card content does not open the post.
+
+If `permalink_url` is missing for a post, the caption link is not actionable for that post.
 
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 

@@ -14,7 +14,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.fb-card:hover .fb-card__title {
+.fb-card__title--link:hover {
   padding-bottom: 1px;
   text-decoration: underline;
 }
