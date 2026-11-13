@@ -64,6 +64,13 @@
   --btn-disabled-opacity: 0.65;
   --btn-radius: 0;
 
+  /* News-item card (matches the PWC "What's happening" news cards) */
+  --clr-news-title: #0f75bc;
+  --clr-news-title-hover: #0b5a91;
+  --clr-news-text: #333333;
+  --clr-news-divider: #1b6d84;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
+
   /* Typography */
   --font-family-base:
     Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
