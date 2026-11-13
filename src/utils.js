@@ -113,6 +113,164 @@ export function removeEmojis(text) {
     .trim();
 }
 
+// Helper: Extract title from caption (first line or sentence)
+export function extractTitle(caption) {
+  if (!caption) return "View post";
+
+  // Remove emojis comprehensively
+  let cleaned = removeEmojis(caption);
+
+  // Normalize line endings (convert \r\n to \n)
+  cleaned = cleaned.replace(/\r\n/g, "\n");
+
+  // Check if starts with non-alphanumeric character (e.g., quote, emoji)
+  const startsWithNonAlpha = /^[^a-zA-Z0-9]/.test(cleaned);
+
+  // Remove leading non-alphanumeric characters
+  cleaned = cleaned.replace(/^[^a-zA-Z0-9]+/, "");
+
+  let endIndex = cleaned.length;
+
+  if (startsWithNonAlpha) {
+    // For quoted or special text, extract only first sentence
+    const periodIndex = cleaned.indexOf(".");
+    const exclamationIndex = cleaned.indexOf("!");
+    const questionIndex = cleaned.indexOf("?");
+
+    // Find first valid punctuation mark
+    const validIndices = [periodIndex, exclamationIndex, questionIndex].filter(
+      (idx) => idx > 0,
+    );
+
+    if (validIndices.length > 0) {
+      endIndex = Math.min(...validIndices);
+    }
+  } else {
+    // For normal text, find first terminator (punctuation or double newline)
+    const periodIndex = cleaned.indexOf(".");
+    const exclamationIndex = cleaned.indexOf("!");
+    const questionIndex = cleaned.indexOf("?");
+    const doubleNewlineIndex = cleaned.indexOf("\n\n");
+
+    // Collect all valid terminators
+    const validIndices = [
+      periodIndex,
+      exclamationIndex,
+      questionIndex,
+      doubleNewlineIndex,
+    ].filter((idx) => idx > 0);
+
+    if (validIndices.length > 0) {
+      // Use the first terminator found
+      endIndex = Math.min(...validIndices);
+    } else {
+      // Fallback to first line
+      const firstNewline = cleaned.indexOf("\n");
+      if (firstNewline > 0) {
+        endIndex = firstNewline;
+      }
+    }
+  }
+
+  // Extract title
+  let title = cleaned.substring(0, endIndex).trim();
+
+  // Remove trailing punctuation and whitespace
+  return title.replace(/[.,;:!?]+\s*$/, "").trim();
+}
+
+// Helper: Truncate text to specified length
+export function truncateText(text, maxLength = 150) {
+  if (!text) return "";
+
+  // Remove emojis comprehensively
+  let cleaned = removeEmojis(text);
+
+  // Normalize line endings (convert \r\n to \n)
+  cleaned = cleaned.replace(/\r\n/g, "\n");
+
+  // Check if starts with non-alphanumeric character (before removing leading chars)
+  const startsWithNonAlpha = /^[^a-zA-Z0-9]/.test(cleaned);
+
+  // Remove leading non-alphanumeric characters
+  const originalCleaned = cleaned.replace(/^[^a-zA-Z0-9]+/, "");
+
+  let titleEndIndex = originalCleaned.length;
+
+  if (startsWithNonAlpha) {
+    // For quoted text, title is just first sentence
+    const periodIndex = originalCleaned.indexOf(".");
+    const exclamationIndex = originalCleaned.indexOf("!");
+    const questionIndex = originalCleaned.indexOf("?");
+
+    // Find first valid punctuation mark
+    const validIndices = [periodIndex, exclamationIndex, questionIndex].filter(
+      (idx) => idx > 0,
+    );
+
+    if (validIndices.length > 0) {
+      titleEndIndex = Math.min(...validIndices) + 1;
+      cleaned = originalCleaned.substring(titleEndIndex).trim();
+    } else {
+      return "";
+    }
+  } else {
+    // For normal text, find first terminator (punctuation or double newline)
+    const periodIndex = originalCleaned.indexOf(".");
+    const exclamationIndex = originalCleaned.indexOf("!");
+    const questionIndex = originalCleaned.indexOf("?");
+    const doubleNewlineIndex = originalCleaned.indexOf("\n\n");
+
+    // Collect all valid terminators
+    const validIndices = [
+      periodIndex,
+      exclamationIndex,
+      questionIndex,
+      doubleNewlineIndex,
+    ].filter((idx) => idx > 0);
+
+    if (validIndices.length > 0) {
+      // Use the first terminator found
+      titleEndIndex = Math.min(...validIndices);
+      // Skip past the terminator (and extra newline if double newline)
+      const skipLength = titleEndIndex === doubleNewlineIndex ? 2 : 1;
+      cleaned = originalCleaned.substring(titleEndIndex + skipLength).trim();
+    } else {
+      const firstNewline = originalCleaned.indexOf("\n");
+      if (firstNewline > 0) {
+        titleEndIndex = firstNewline;
+        cleaned = originalCleaned.substring(titleEndIndex + 1).trim();
+      } else {
+        return "";
+      }
+    }
+  }
+
+  // Remove any leading punctuation, quotes, spaces, or attribution markers
+  cleaned = cleaned.replace(/^[""".,;:!?\s–—-]+/, "");
+
+  // Remove attribution if it starts with a dash and name
+  cleaned = cleaned.replace(/^[–—-]\s*[A-Z][^,\n]*,?\s*/, "");
+
+  if (!cleaned || cleaned.length <= maxLength) return cleaned;
+
+  // Look ahead for next punctuation mark within 50 chars after limit
+  const searchEnd = Math.min(cleaned.length, maxLength + 50);
+  const afterLimit = cleaned.substring(maxLength, searchEnd);
+  const punctuationMatch = afterLimit.match(/[.!?\n]/);
+
+  if (punctuationMatch) {
+    // Cut at the punctuation mark
+    const cutPoint = maxLength + punctuationMatch.index + 1;
+    return cleaned.substring(0, cutPoint).trim();
+  }
+
+  // No punctuation found nearby, truncate at word boundary without ellipsis
+  const truncated = cleaned.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated).trim();
+}
+
 // Helper: Process text with line breaks and links
 export function processText(text) {
   if (!text) return "";
@@ -169,13 +327,6 @@ export function hasPhotoAttachment(post) {
   return true;
 }
 
-// Helper: Get the post's own image URL, or null if it has none
-export function getPostImageUrl(post) {
-  return (
-    post.full_picture || post.attachments?.data?.[0]?.media?.image?.src || null
-  );
-}
-
 // Helper: Get image URL from post
 export function getImageUrl(post) {
   // Check for full_picture field (from Facebook Graph API)
@@ -192,19 +343,19 @@ export function getImageUrl(post) {
   return "./placeholder.png";
 }
 
-// Split a post message into the card heading (full first line) and
-// supporting text (second line, if any). Blank lines are skipped.
+// Helper: Extract title and description from message
 export function extractContent(message) {
-  const lines = (message || "")
-    .replace(/\r\n?/g, "\n")
-    .split("\n")
-    .map((line) => removeEmojis(line))
-    .filter(Boolean);
+  if (!message) {
+    return { title: "View post", description: "" };
+  }
 
-  return {
-    title: lines[0] || "View post",
-    description: lines[1] || "",
-  };
+  // Use sophisticated title extraction
+  const title = extractTitle(message);
+
+  // Use smart truncation for description (150 chars with punctuation lookahead)
+  const description = truncateText(message, 150);
+
+  return { title, description };
 }
 
 // Filter posts based on widget configuration

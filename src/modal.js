@@ -1,104 +1,199 @@
-// Post pop-up, rendered with Fancybox (no Bootstrap/jQuery dependency).
-// Fancybox opens content in a native <dialog>, which provides the focus trap,
-// Escape-to-close and backdrop handling; `triggerEl` returns focus on close.
-import { Fancybox } from "@fancyapps/ui/dist/fancybox/";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
+// Modal functionality
 import {
   formatDate,
+  extractContent,
   processText,
-  getPostImageUrl,
-  escapeHtml,
+  getImageUrl,
 } from "./utils.js";
 
-let modalCount = 0;
+// Track focus for restoration
+let previouslyFocusedElement = null;
 
-function buildModalContent(post) {
+// Get all focusable elements within a container
+function getFocusableElements(container) {
+  const focusableSelectors = [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(", ");
+
+  return Array.from(container.querySelectorAll(focusableSelectors));
+}
+
+// Create focus trap for modal
+function createFocusTrap(modal) {
+  const focusableElements = getFocusableElements(modal);
+
+  if (focusableElements.length === 0) return null;
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  return function trapFocus(e) {
+    if (e.key !== "Tab") return;
+
+    // Shift + Tab on first element -> move to last
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    // Tab on last element -> move to first
+    if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement.focus();
+    }
+  };
+}
+
+// Show post modal using Bootstrap modal
+export function showPostModal(post, triggeringElement = null) {
+  const { title } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
-  const imageUrl = getPostImageUrl(post);
+  const imageUrl = getImageUrl(post);
 
   // Get engagement stats
   const likes = post.reactions?.summary?.total_count || 0;
   const comments = post.comments?.summary?.total_count || 0;
   const shares = post.shares?.count || 0;
 
-  const permalink = post.permalink_url || "";
+  const postUrl =
+    post.attachments?.data?.[0]?.target?.url ||
+    post.attachments?.data?.[0]?.unshimmed_url ||
+    "#";
+  const permalink = post.permalink_url || "#";
   const fullMessage = post.message || "No message available";
+  const processedMessage = processText(fullMessage);
 
-  const id = `fbPostModal${++modalCount}`;
-  const content = document.createElement("div");
-  content.className = imageUrl ? "fb-modal" : "fb-modal fb-modal--no-image";
-  content.setAttribute("role", "document");
+  // Store previously focused element
+  previouslyFocusedElement = triggeringElement || document.activeElement;
 
-  content.innerHTML = `
-    <button type="button" class="fb-modal__close" data-fancybox-close aria-label="Close">&times;</button>
-    ${
-      imageUrl
-        ? `<div class="fb-modal__image" style="background-image: url('${escapeHtml(imageUrl)}')">
-            <img src="${escapeHtml(imageUrl)}" alt="" onerror="this.src='https://placehold.co/600x400/transparent/777?text=Image+not+available'">
-          </div>`
-        : ""
-    }
-    <div class="fb-modal__scroll">
-      <div class="fb-modal__header">
-        <div class="fb-modal__engagement">
-          <div class="fb-modal__stat">
-            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive" aria-hidden="true"></i>
-            ${likes > 0 ? `<span class="fb-card__count">${likes}<span class="fb-sr-only"> likes</span></span>` : ""}
-          </div>
-          <div class="fb-modal__stat">
-            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive" aria-hidden="true"></i>
-            ${comments > 0 ? `<span class="fb-card__count">${comments}<span class="fb-sr-only"> comments</span></span>` : ""}
-          </div>
-          <div class="fb-modal__stat">
-            <i class="fal fa-share fb-card__icon fb-card__icon--inactive" aria-hidden="true"></i>
-            ${shares > 0 ? `<span class="fb-card__count">${shares}<span class="fb-sr-only"> shares</span></span>` : ""}
-          </div>
+  const modalId = "fbPostModal" + Date.now();
+  const modal = document.createElement("div");
+  modal.className = "modal fade fb-modal";
+  modal.id = modalId;
+  modal.setAttribute("tabindex", "-1");
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-labelledby", "modal-date");
+  modal.setAttribute("aria-describedby", "modal-body");
+
+  modal.innerHTML = `
+    <div class="modal-dialog modal-dialog-scrollable modal-lg fb-modal__dialog" role="document">
+      <div class="modal-content fb-modal__content">
+        <div class="fb-modal__image" style="background-image: url('${imageUrl}')">
+          <img src="${imageUrl}" alt="Post image" onerror="this.src='https://placehold.co/600x400/transparent/777?text=Image+not+available'">
+          <button type="button" class="fb-modal__close" data-dismiss="modal" aria-label="Close">&times;</button>
         </div>
-        <div class="fb-modal__date" id="${id}-date">${formattedDate}</div>
+        <div class="modal-body p-0">
+          <div class="fb-modal__header">
+            <div class="fb-modal__engagement">
+              <div class="fb-modal__stat">
+                <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive"></i>
+                ${likes > 0 ? `<span class="fb-card__count">${likes}</span>` : ""}
+              </div>
+              <div class="fb-modal__stat">
+                <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive"></i>
+                ${comments > 0 ? `<span class="fb-card__count">${comments}</span>` : ""}
+              </div>
+              <div class="fb-modal__stat">
+                <i class="fal fa-share fb-card__icon fb-card__icon--inactive"></i>
+                ${shares > 0 ? `<span class="fb-card__count">${shares}</span>` : ""}
+              </div>
+            </div>
+            <div class="fb-modal__date" id="modal-date">${formattedDate}</div>
+          </div>
+          <div class="fb-modal__body" id="modal-body">
+          </div>
+          ${
+            permalink !== "#" || postUrl !== "#"
+              ? `
+            <div class="fb-modal__footer">
+              ${
+                permalink !== "#"
+                  ? `<a href="${permalink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                      <i class="fab fa-facebook-f"></i>
+                      View on Facebook
+                    </a>`
+                  : ""
+              }
+              ${
+                postUrl !== "#"
+                  ? `<a href="${postUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-tertiary">
+                      View on Facebook
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M12 8.67v4.66a.67.67 0 01-.67.67H2.67A.67.67 0 012 13.33V4.67c0-.37.3-.67.67-.67h4.66M10 2h4v4M6.67 9.33L14 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>`
+                  : ""
+              }
+            </div>
+          `
+              : ""
+          }
+        </div>
       </div>
-      <div class="fb-modal__body" id="${id}-body"></div>
     </div>
-    ${
-      permalink
-        ? `<div class="fb-modal__footer">
-            <a href="${escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer" class="fb-modal__button">
-              <i class="fab fa-facebook-f" aria-hidden="true"></i>
-              View on Facebook
-            </a>
-          </div>`
-        : ""
-    }
   `;
 
-  // Insert processed message with HTML (links, line breaks)
-  content.querySelector(".fb-modal__body").innerHTML = processText(fullMessage);
+  // Insert processed message with HTML
+  modal.querySelector(".fb-modal__body").innerHTML = processedMessage;
 
-  return { content, id };
-}
+  document.body.appendChild(modal);
 
-// Show the full post in a pop-up
-export function showPostModal(post, triggeringElement = null) {
-  const { content, id } = buildModalContent(post);
+  // Use Bootstrap modal API
+  const $modal = $(modal);
+  let focusTrapListener = null;
 
-  Fancybox.show([{ html: content }], {
-    mainClass: "fb-fancybox",
-    closeButton: false,
-    dragToClose: false,
-    closeExisting: true,
-    placeFocusBack: true,
-    triggerEl: triggeringElement || document.activeElement || undefined,
-    Carousel: {
-      Toolbar: false,
-    },
-    on: {
-      ready: (instance) => {
-        const dialog = instance.getContainer()?.closest("dialog");
-        if (dialog) {
-          dialog.setAttribute("aria-labelledby", `${id}-date`);
-          dialog.setAttribute("aria-describedby", `${id}-body`);
-        }
-        content.querySelector(".fb-modal__close")?.focus();
-      },
-    },
+  // Handle modal shown event
+  $modal.on("shown.bs.modal", function () {
+    const closeButton = modal.querySelector(".fb-modal__close");
+    if (closeButton) {
+      closeButton.focus();
+    }
+
+    // Set up focus trap
+    focusTrapListener = createFocusTrap(modal);
+    if (focusTrapListener) {
+      modal.addEventListener("keydown", focusTrapListener);
+    }
+
+    // Hide background content from screen readers
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+      mainContent.setAttribute("aria-hidden", "true");
+    }
   });
+
+  // Handle modal hidden event
+  $modal.on("hidden.bs.modal", function () {
+    // Remove focus trap
+    if (focusTrapListener) {
+      modal.removeEventListener("keydown", focusTrapListener);
+      focusTrapListener = null;
+    }
+
+    // Restore background content accessibility
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) {
+      mainContent.removeAttribute("aria-hidden");
+    }
+
+    modal.remove();
+
+    // Restore focus to triggering element
+    if (
+      previouslyFocusedElement &&
+      typeof previouslyFocusedElement.focus === "function"
+    ) {
+      previouslyFocusedElement.focus();
+    }
+    previouslyFocusedElement = null;
+  });
+
+  // Show the modal
+  $modal.modal("show");
 }

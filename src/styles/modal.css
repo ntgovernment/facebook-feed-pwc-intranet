@@ -1,39 +1,23 @@
-/* Post pop-up - rendered by Fancybox (see src/modal.js) */
-
-/* Fancybox container overrides. Extra specificity because fancybox.css is
-   bundled after these styles and defines the same variables. */
-.fancybox__dialog .fancybox__container.fb-fancybox {
-  --fancybox-backdrop-bg: rgba(0, 0, 0, 0.6);
-  /* Fancybox adds .f-html to .fb-modal itself, so these style the dialog box */
-  --f-html-padding: 0;
-  --f-html-bg: var(--clr-bg-default);
-  --f-html-color: var(--clr-text-default);
+/* Modal Styles - Bootstrap Integration */
+.fb-modal .modal-dialog {
+  max-width: 800px;
 }
 
-.fb-fancybox .fancybox__slide.has-html {
-  padding: var(--spacing-md);
+.fb-modal .modal-content {
+  border: none;
+  border-radius: 0;
 }
 
-/* Dialog box */
-.fb-modal {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 800px;
-  max-width: 100%;
-  max-height: calc(100dvh - 2 * var(--spacing-md));
-  background: var(--clr-bg-default);
-  box-shadow: var(--shadow-lg);
-  font-family: var(--font-family-base);
-  text-align: left;
+.fb-modal .modal-body {
+  padding: 0;
 }
 
-/* Image Section */
+/* Modal Image Section */
 .fb-modal__image {
   position: relative;
-  flex-shrink: 0;
   width: 100%;
-  height: 340px;
+  height: 350px;
+  min-height: 350px;
   background: var(--dpsc-background-light);
   background-size: cover;
   background-position: center;
@@ -54,73 +38,64 @@
 }
 
 .fb-modal__image img {
-  position: relative;
-  z-index: 1;
-  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
+  position: relative;
+  z-index: 1;
+  transition: opacity var(--transition-slow);
 }
 
 .fb-modal__image img[src*="placehold"] {
+  object-fit: contain;
   padding: 20px;
 }
 
-/* Close button */
 .fb-modal__close {
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
+  background: rgba(0, 0, 0, 0.6);
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
-  color: #ffffff;
   font-size: var(--font-size-xxl);
   line-height: 1;
   cursor: pointer;
+  color: #ffffff;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background var(--transition-base);
+  z-index: 2;
+  text-shadow: none;
 }
 
 .fb-modal__close:hover {
   background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  text-shadow: none;
 }
 
 .fb-modal__close:focus {
-  outline: none;
-}
-
-.fb-modal__close:focus-visible {
   outline: var(--focus-outline);
   outline-offset: 0;
 }
 
-/* Scrollable middle section (header + message) */
-.fb-modal__scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
+.fb-modal__close:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .fb-modal__header {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl) 0 var(--spacing-xl);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  padding: var(--spacing-lg) var(--spacing-xl) 0;
-}
-
-/* Without an image the close button sits over the header */
-.fb-modal--no-image .fb-modal__header {
-  padding-top: 72px;
 }
 
 .fb-modal__engagement {
@@ -139,70 +114,59 @@
 .fb-modal__date {
   margin: 0;
   color: var(--clr-text-default);
+  font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   white-space: nowrap;
 }
 
 .fb-modal__body {
-  padding: 0 var(--spacing-xl) var(--spacing-lg);
-  color: var(--clr-text-default);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  word-wrap: break-word;
+  margin-bottom: var(--spacing-lg);
+  padding: 0 var(--spacing-xl);
 }
 
-/* Fancybox sets `*:empty { display: block }`, which would turn each <br>
-   into an extra blank line. Keep line breaks behaving normally. */
-.fancybox__dialog .fb-modal__body br {
-  display: inline;
+.fb-modal__body p {
+  margin: 0;
+  color: var(--clr-text-default);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
 }
 
 .fb-modal__footer {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl)
+    var(--spacing-xl);
   border-top: 1px solid var(--clr-border-subtle);
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
-/* Visually hidden text for screen readers */
-.fb-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+.fb-modal__footer .btn-tertiary {
+  font-size: var(--font-size-base);
 }
 
 /* Responsive Modal */
-@media (max-width: 575.98px) {
-  .fb-fancybox .fancybox__slide.has-html {
-    padding: 0;
+@media (max-width: 576px) {
+  .fb-modal .modal-dialog {
+    margin: 0;
+    max-width: 100%;
   }
 
-  .fb-modal {
-    width: 100%;
-    max-height: 100dvh;
-    min-height: 100dvh;
-  }
-
-  .fb-modal__image {
-    height: 220px;
+  .fb-modal .modal-content {
+    min-height: 100vh;
   }
 
   .fb-modal__header {
-    padding: var(--spacing-lg) var(--spacing-lg) 0;
+    padding: var(--spacing-lg) var(--spacing-lg) 0 var(--spacing-lg);
   }
 
   .fb-modal__body {
-    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: 0 var(--spacing-lg);
   }
 
   .fb-modal__footer {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg)
+      var(--spacing-lg);
   }
 }

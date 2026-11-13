@@ -11,10 +11,27 @@
   font-size: var(--font-size-base);
 }
 
-/* List Layout - one news-style card per row */
+/* Grid Layout */
 .fb-feed__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+  align-items: start;
+}
+
+/* Compact card size - responsive grid */
+.fb-feed__grid--compact {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .fb-feed__grid--compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .fb-feed__grid--compact {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
