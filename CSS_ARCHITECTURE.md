@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Facebook Feed Widget uses a Bootstrap 4 compatible, variable-based modular CSS architecture. This design system ensures consistency, maintainability, and compatibility with the NT.gov.au framework.
+The Facebook Feed Widget uses a variable-based modular CSS architecture. It does not depend on Bootstrap or jQuery: the post pop-up is rendered by [Fancybox](https://fancyapps.com/fancybox/) (`@fancyapps/ui`), which is bundled with the widget along with its stylesheet.
 
 ## Design System Structure
 
@@ -76,9 +76,9 @@ Consistent focus indicators across all interactive elements:
 --focus-outline: 4px solid var(--clr-focus); /* Complete focus outline */
 ```
 
-#### 7. Bootstrap 4 Button Variables
+#### 7. Button Variables
 
-Complete button state system for Bootstrap 4 compatibility:
+Button state tokens used by the pop-up's "View on Facebook" button:
 
 ```css
 /* Base States */
@@ -171,69 +171,27 @@ The CSS is organized into modular files for maintainability:
 ```
 src/styles/
 ├── variables.css      # All design tokens (40+ variables)
-├── layout.css        # Grid layout and container styles
+├── layout.css        # Single-column list layout and container styles
 ├── card.css          # Card component styles
-├── button.css        # Bootstrap 4 compatible button styles
-├── modal.css         # Modal component styles
+├── button.css        # Pop-up button styles (no Bootstrap)
+├── modal.css         # Post pop-up styles (Fancybox content + overrides)
 └── links.css         # Link and anchor styles
 ```
 
 Entry point: [`src/styles.css`](src/styles.css) imports all modules.
 
-## Bootstrap 4 Compatibility
+## Fancybox Pop-up
 
-### Button Scoping
+[`src/modal.js`](src/modal.js) builds the pop-up content and opens it with `Fancybox.show([{ html }], { mainClass: "fb-fancybox", ... })`. Fancybox's own stylesheet is imported in `modal.js`, so it ends up in the same `styles.css` bundle.
 
-To prevent conflicts with the NT.gov.au Bootstrap framework, all button styles are scoped:
-
-```css
-.facebook-feed .btn-primary,
-.fb-modal .btn-primary,
-.fb-card .btn {
-  /* Scoped styles with !important to override Bootstrap */
-}
-```
-
-**Why scoping is needed:**
-
-- NT.gov.au pages use Bootstrap 4 globally
-- Scoping ensures widget buttons don't conflict with page buttons
-- `!important` flags ensure our styles take precedence within widget scope
-
-### Button State Pattern
-
-Follows Bootstrap 4's button state architecture:
-
-```css
-/* Default */
-.fb-modal .btn-primary {
-  background: var(--btn-primary-bg);
-}
-
-/* Hover */
-.fb-modal .btn-primary:hover {
-  background: var(--btn-primary-hover-bg);
-}
-
-/* Active/Pressed */
-.fb-modal .btn-primary:active {
-  background: var(--btn-primary-active-bg);
-}
-
-/* Focus */
-.fb-modal .btn-primary:focus {
-  box-shadow: var(--btn-primary-focus-shadow);
-}
-
-/* Disabled */
-.fb-modal .btn-primary:disabled {
-  opacity: var(--btn-disabled-opacity);
-}
-```
+- Fancybox renders into a native `<dialog>`, which provides the focus trap, `Escape` to close and backdrop click to close. `triggerEl` returns focus to the card title on close.
+- Fancybox's close button and toolbar are disabled; the widget renders its own round close button (`.fb-modal__close`, marked `data-fancybox-close`).
+- Fancybox container variables (backdrop colour, slide padding) are overridden under `.fancybox__container.fb-fancybox` in [`modal.css`](src/styles/modal.css).
+- Fancybox's stylesheet sets `.fancybox__dialog *:empty { display: block }`; `modal.css` resets `<br>` inside the message body so line breaks render normally.
 
 ## Engagement Icon Treatment
 
-The feed card and modal engagement rows reuse the `.fb-card__icon` and `.fb-card__icon--inactive` classes from [src/styles/card.css](src/styles/card.css).
+Feed cards no longer show engagement icons. The post modal engagement row reuses the `.fb-card__icon` and `.fb-card__icon--inactive` classes from [src/styles/card.css](src/styles/card.css).
 
 `fb-card__icon--inactive` is not limited to zero-value states. In the current widget design it is also applied intentionally to like, comment, and share icons even when engagement counts are present, keeping those icons visually subdued while leaving the numeric counts readable.
 
@@ -287,97 +245,62 @@ Update font family or sizes centrally:
 
 ### Responsive Breakpoints
 
-Grid breakpoints are defined in [`src/styles/layout.css`](src/styles/layout.css):
-
-```css
-/* Mobile first, then: */
-@media (min-width: 768px) {
-  /* Tablet */
-  .fb-feed__grid--compact {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  /* Desktop */
-  .fb-feed__grid--compact {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-```
+The feed is a single-column list at every width ([`src/styles/layout.css`](src/styles/layout.css)). Below 576px each card stacks its image above the text ([`src/styles/card.css`](src/styles/card.css)), and the pop-up goes full screen ([`src/styles/modal.css`](src/styles/modal.css)).
 
 ## Component Architecture
 
 ### Card Component ([`card.css`](src/styles/card.css))
 
+Cards follow the PWC "What's happening" news-item layout: image on the left, text on the right.
+
 Structure:
 
 ```
-.fb-card
-  └─ .fb-card__inner
-      ├─ .fb-card__image
-      │   └─ img
-      ├─ .fb-card__header
-      │   ├─ .fb-card__tag-wrapper
-      │   │   └─ .fb-card__tag
-      │   └─ .fb-card__date
-      ├─ .fb-card__content
-      │   └─ .fb-card__text
-      │       ├─ .fb-card__title-row
-      │       │   └─ .fb-card__title
-      │       └─ .fb-card__description
-      └─ .fb-card__footer
+article.fb-card                 (.fb-card--text when there is no image)
+  ├─ .fb-card__image
+  │   └─ img
+  └─ .fb-card__body
+      ├─ .fb-card__text
+      │   ├─ h3.fb-card__title
+      │   │   └─ a.fb-card__title-link      first line of the post (full)
+      │   └─ p.fb-card__description         second line, clamped to 2 lines
+      └─ .fb-card__footer                   divider + date (uppercase)
+          └─ time.fb-card__date
 ```
 
 Uses variables:
 
-- Spacing: `--spacing-lg`, `--spacing-sm`, `--spacing-xs`
-- Colors: `--clr-bg-default`, `--dpsc-background-light`, `--clr-border-subtle`
-- Typography: `--font-family-base`, `--font-size-xs/sm/base/lg`
-- Shadows: `--shadow-sm`
+- Colors: `--clr-news-title`, `--clr-news-title-hover`, `--clr-news-text`, `--clr-news-divider`, `--clr-bg-default`, `--dpsc-background-light`
+- Spacing: `--spacing-md`, `--spacing-lg`, `--spacing-xs`
+- Typography: `--font-family-base`, `--font-size-lg`, `--line-height-base`
+- Shadows: `--shadow-card`, `--shadow-sm` (hover)
 
 ### Modal Component ([`modal.css`](src/styles/modal.css))
 
-Structure:
+Structure (placed inside the Fancybox slide):
 
 ```
-.fb-modal
-  ├─ .fb-modal__overlay
-  └─ .fb-modal__content
-      ├─ .fb-modal__close
-      ├─ .fb-modal__header
-      │   ├─ h2
-      │   └─ .fb-modal__date
-      ├─ .fb-modal__body
-      │   └─ p
-      └─ .fb-modal__footer
-          └─ .btn-tertiary
+.fb-modal                       (.fb-modal--no-image when the post has no image)
+  ├─ button.fb-modal__close      [data-fancybox-close]
+  ├─ .fb-modal__image            the post's single image (omitted when none)
+  ├─ .fb-modal__scroll           scrolls when the post is long
+  │   ├─ .fb-modal__header
+  │   │   ├─ .fb-modal__engagement
+  │   │   └─ .fb-modal__date
+  │   └─ .fb-modal__body          full post text, links and line breaks
+  └─ .fb-modal__footer
+      └─ a.fb-modal__button       "View on Facebook"
 ```
 
 Uses variables:
 
 - Spacing: `--spacing-md`, `--spacing-lg`, `--spacing-xl`
-- Colors: `--overlay-bg`, `--dpsc-text-light`
+- Colors: `--clr-bg-default`, `--clr-border-subtle`, `--dpsc-text-light`
 - Shadows: `--shadow-lg`
-- Transitions: `--transition-slow`
 
 ### Button Component ([`button.css`](src/styles/button.css))
 
-**Two Variants:**
-
-1. **Primary Button** - Call-to-action button
-
-   ```html
-   <a href="#" class="btn btn-primary">View on Facebook</a>
-   ```
-
-2. **Tertiary Button** - Text link with icon
-   ```html
-   <button class="btn btn-tertiary">
-     Find out more
-     <svg>...</svg>
-   </button>
-   ```
+`.fb-modal__button` is the pop-up's primary "View on Facebook" link, styled with the `--btn-primary-*` variables. It does not rely on Bootstrap's `.btn` classes.
 
 ## Best Practices
 
@@ -417,22 +340,23 @@ margin-bottom: 15px; /* Random value */
 margin-bottom: var(--spacing-md); /* 16px from system */
 ```
 
-### 3. Scope Bootstrap Overrides
+### 3. Keep Styles Scoped to Widget Classes
 
 ❌ **DON'T:**
 
 ```css
-.btn {
-  /* Unscoped - will conflict with NT.gov.au Bootstrap */
+.btn,
+h3 {
+  /* Generic selectors - will conflict with the host page */
 }
 ```
 
 ✅ **DO:**
 
 ```css
-.facebook-feed .btn,
-.fb-modal .btn {
-  /* Scoped - only affects widget buttons */
+.fb-modal__button,
+.fb-card__title {
+  /* Widget-specific BEM classes only */
 }
 ```
 
@@ -484,7 +408,7 @@ CSS Custom Properties are widely supported (95%+ global coverage).
 2. Import in `src/styles.css`
 3. Use existing variables - avoid creating new ones unless necessary
 4. Follow BEM naming: `.fb-component__element--modifier`
-5. Scope any Bootstrap overrides
+5. Keep selectors scoped to widget classes
 
 ### Modifying Existing Styles
 
@@ -525,7 +449,7 @@ All color combinations meet WCAG AA standards:
 ### Keyboard Navigation
 
 - All buttons and links are keyboard accessible
-- Modal includes focus trap
+- Pop-up focus trap and `Escape` handling come from Fancybox's native `<dialog>`; focus returns to the card title on close
 - Tab order follows visual hierarchy
 
 ## Migration from Legacy Code
@@ -556,7 +480,7 @@ If migrating from hard-coded styles:
 
 - [Instagram Feed CSS Architecture](../instagram-feed-agency-internet/CSS_ARCHITECTURE.md) - Sister project with identical variable structure
 - [NT.gov.au Design System](https://nt.gov.au) - Parent framework documentation
-- [Bootstrap 4 Documentation](https://getbootstrap.com/docs/4.6/) - Button and grid system reference
+- [Fancybox Documentation](https://fancyapps.com/fancybox/) - Pop-up options and events
 
 ## Support
 
@@ -564,11 +488,11 @@ For questions or issues with the CSS architecture:
 
 1. Check variable definitions in [`src/styles/variables.css`](src/styles/variables.css)
 2. Review component-specific CSS modules
-3. Ensure Bootstrap scoping is maintained
+3. Ensure selectors stay scoped to widget classes
 4. Test in isolation before integrating with NT.gov.au pages
 
 ---
 
-**Last Updated:** January 31, 2026  
-**Architecture Version:** 2.0 (Bootstrap 4 Compatible)  
+**Last Updated:** November 13, 2026  
+**Architecture Version:** 3.0 (No Bootstrap; Fancybox pop-up)  
 **Design System:** DPSC Figma Components

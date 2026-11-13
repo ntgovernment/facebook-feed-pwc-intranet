@@ -3,165 +3,59 @@ import {
   formatDate,
   extractContent,
   getImageUrl,
-  processText,
   escapeHtml,
 } from "./utils.js";
 import { showPostModal } from "./modal.js";
 
-// Create photo card layout
-export function createPhotoCard(post) {
+// Build a news-style card: optional image on the left, then the heading
+// (first line of the post), supporting text (second line, clamped to two
+// lines by CSS), and the date. Clicking anywhere on the card opens the post.
+function createCard(post, { withImage }) {
   const { title, description } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
-  const imageUrl = getImageUrl(post);
 
-  // Get engagement stats
-  const likes = post.reactions?.summary?.total_count || 0;
-  const comments = post.comments?.summary?.total_count || 0;
-  const shares = post.shares?.count || 0;
+  const card = document.createElement("article");
+  card.className = withImage ? "fb-card" : "fb-card fb-card--text";
 
-  // Process description to include links
-  const processedDescription = processText(description);
+  const imageMarkup = withImage
+    ? `
+    <div class="fb-card__image" style="background-image: url('${escapeHtml(getImageUrl(post))}')">
+      <img src="${escapeHtml(getImageUrl(post))}" alt="" onerror="this.src='https://placehold.co/353x199/transparent/777?text=Image+not+available'">
+    </div>`
+    : "";
 
-  const card = document.createElement("div");
-  card.className = "fb-card";
-  card.setAttribute("tabindex", "0");
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `View post: ${escapeHtml(title)}`);
-  card.innerHTML = `
-    <div class="fb-card__inner" data-footer="false" data-header="true" data-rich-media="true">
-      <div class="fb-card__image" data-ratio="16:9" style="background-image: url('${imageUrl}')">
-        <img src="${imageUrl}" alt="Post image" onerror="this.src='https://placehold.co/353x199/transparent/777?text=Image+not+available'">
+  card.innerHTML = `${imageMarkup}
+    <div class="fb-card__body">
+      <div class="fb-card__text">
+        <h3 class="fb-card__title">
+          <a href="#" class="fb-card__title-link" aria-haspopup="dialog">${escapeHtml(title)}</a>
+        </h3>
+        ${description ? `<p class="fb-card__description">${escapeHtml(description)}</p>` : ""}
       </div>
-      <div class="fb-card__header" data-show-date="true" data-show-tag="true">
-        <div class="fb-card__engagement">
-          <div class="fb-card__stat">
-            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive"></i>
-            ${likes > 0 ? `<span class="fb-card__count">${likes}</span>` : ""}
-          </div>
-          <div class="fb-card__stat">
-            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive"></i>
-            ${comments > 0 ? `<span class="fb-card__count">${comments}</span>` : ""}
-          </div>
-          <div class="fb-card__stat">
-            <i class="fal fa-share fb-card__icon fb-card__icon--inactive"></i>
-            ${shares > 0 ? `<span class="fb-card__count">${shares}</span>` : ""}
-          </div>
-        </div>
-        <div class="fb-card__date">${formattedDate}</div>
-      </div>
-      <div class="fb-card__content" data-icon="false" data-type="Default">
-        <div class="fb-card__text">
-          <div class="fb-card__title-row">
-            <a href="#" class="fb-card__title fb-card__title--link" tabindex="-1">${escapeHtml(title)}</a>
-          </div>
-          ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
-        </div>
+      <div class="fb-card__footer">
+        <time class="fb-card__date" datetime="${escapeHtml(post.created_time || "")}">${formattedDate}</time>
       </div>
     </div>
   `;
 
-  // Insert processed description with HTML if it exists
-  if (processedDescription) {
-    card.querySelector(".fb-card__description").innerHTML =
-      processedDescription;
-  }
+  const titleLink = card.querySelector(".fb-card__title-link");
 
-  card.querySelector(".fb-card__title--link").addEventListener("click", (e) => {
-    e.preventDefault();
-    showPostModal(post, card);
-  });
-
-  // Card click handler
+  // The title link is the keyboard/screen-reader target; the whole card is a
+  // larger mouse target that does the same thing.
   card.addEventListener("click", (e) => {
-    if (!e.target.closest(".fb-card__title--link")) {
-      showPostModal(post, card);
-    }
-  });
-
-  // Keyboard handler for accessibility
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      showPostModal(post, card);
-    }
+    e.preventDefault();
+    showPostModal(post, titleLink);
   });
 
   return card;
 }
 
+// Create photo card layout
+export function createPhotoCard(post) {
+  return createCard(post, { withImage: true });
+}
+
 // Create text-only card layout
 export function createTextCard(post) {
-  const { title, description } = extractContent(post.message);
-  const formattedDate = formatDate(post.created_time);
-
-  // Get engagement stats
-  const likes = post.reactions?.summary?.total_count || 0;
-  const comments = post.comments?.summary?.total_count || 0;
-  const shares = post.shares?.count || 0;
-
-  // Process description to include links
-  const processedDescription = processText(description);
-
-  const card = document.createElement("div");
-  card.className = "fb-card";
-  card.setAttribute("tabindex", "0");
-  card.setAttribute("role", "button");
-  card.setAttribute("aria-label", `View post: ${escapeHtml(title)}`);
-  card.innerHTML = `
-    <div class="fb-card__inner fb-card__inner--text" data-footer="false" data-header="true" data-rich-media="false">
-      <div class="fb-card__header" data-show-date="true" data-show-tag="true">
-        <div class="fb-card__engagement">
-          <div class="fb-card__stat">
-            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive"></i>
-            ${likes > 0 ? `<span class="fb-card__count">${likes}</span>` : ""}
-          </div>
-          <div class="fb-card__stat">
-            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive"></i>
-            ${comments > 0 ? `<span class="fb-card__count">${comments}</span>` : ""}
-          </div>
-          <div class="fb-card__stat">
-            <i class="fal fa-share fb-card__icon fb-card__icon--inactive"></i>
-            ${shares > 0 ? `<span class="fb-card__count">${shares}</span>` : ""}
-          </div>
-        </div>
-        <div class="fb-card__date">${formattedDate}</div>
-      </div>
-      <div class="fb-card__content" data-icon="false" data-type="Default">
-        <div class="fb-card__text">
-          <div class="fb-card__title-row">
-            <a href="#" class="fb-card__title fb-card__title--link" tabindex="-1">${escapeHtml(title)}</a>
-          </div>
-          ${processedDescription ? '<div class="fb-card__description"></div>' : ""}
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Insert processed description with HTML if it exists
-  if (processedDescription) {
-    card.querySelector(".fb-card__description").innerHTML =
-      processedDescription;
-  }
-
-  card.querySelector(".fb-card__title--link").addEventListener("click", (e) => {
-    e.preventDefault();
-    showPostModal(post, card);
-  });
-
-  // Card click handler
-  card.addEventListener("click", (e) => {
-    if (!e.target.closest(".fb-card__title--link")) {
-      showPostModal(post, card);
-    }
-  });
-
-  // Keyboard handler for accessibility
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      showPostModal(post, card);
-    }
-  });
-
-  return card;
+  return createCard(post, { withImage: false });
 }

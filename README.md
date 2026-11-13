@@ -81,11 +81,22 @@ Each post is expected to include:
 - `full_picture` or `attachments.data[0].media.image.src` for image cards
 - Optional engagement fields such as `reactions.summary.total_count`, `comments.summary.total_count`, and `shares.count`
 
+### Card and Pop-up Display
+
+Feed cards use the same layout as the intranet news items, in a single-column list:
+
+- The post's full first line is the heading.
+- The second line (if any) is the supporting text, limited to two lines with an ellipsis.
+- The date sits below a divider at the bottom of the card.
+- Feed cards do not show like, comment, or share icons or counts.
+
+Because the heading is the whole first line, posts read best when the first line is short.
+
+Clicking a card opens a pop-up with the full post and its image, so staff can read it without being prompted to log in to Facebook. The pop-up uses [Fancybox](https://fancyapps.com/fancybox/) (`@fancyapps/ui`), which is bundled into `bundle.js` and `styles.css`; the host page does not need Bootstrap or jQuery. Fancybox is commercially licensed software: confirm the licence covers this use.
+
 ### Engagement Display
 
-The widget renders like, comment, and share counts when those values are present in the feed data.
-
-The corresponding engagement icons are intentionally shown in the muted/inactive visual style for all posts, regardless of whether the counts are zero or greater than zero. This is the expected behaviour for both feed cards and the post modal.
+The post modal renders like, comment, and share counts when those values are present in the feed data. Its engagement icons are intentionally shown in the muted/inactive visual style for all posts, regardless of whether the counts are zero or greater than zero.
 
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
