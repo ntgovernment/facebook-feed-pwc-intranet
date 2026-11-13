@@ -192,7 +192,7 @@
 .fb-card__title {
   margin: 0 0 var(--spacing-xs);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-lg);
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -222,7 +222,7 @@
 
 /* Supporting text: second line of the post, limited to two lines */
 .fb-card__description {
-  margin: 0;
+  margin: 0.5rem 0 0 0;
   color: var(--clr-news-text);
   font-family: var(--font-family-base);
   font-size: 15px;
