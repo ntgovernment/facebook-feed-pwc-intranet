@@ -189,7 +189,7 @@
   padding-bottom: 32px;
 }
 
-.fb-card__title {
+h3.fb-card__title {
   margin: 0 0 var(--spacing-xs);
   font-family: var(--font-family-base);
   font-size: 1.25rem;
@@ -221,7 +221,7 @@
 }
 
 /* Supporting text: second line of the post, limited to two lines */
-.fb-card__description {
+p.fb-card__description {
   margin: 0.5rem 0 0 0;
   color: var(--clr-news-text);
   font-family: var(--font-family-base);
