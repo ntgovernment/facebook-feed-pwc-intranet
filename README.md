@@ -83,8 +83,9 @@ Each post is expected to include:
 
 ### Card and Pop-up Display
 
-Feed cards use the same layout as the intranet news items, in a single-column list:
+Feed cards are shown in a single-column list, with text styled like the intranet news items:
 
+- The post's image sits at the top of the card.
 - The post's full first line is the heading.
 - The second line (if any) is the supporting text, limited to two lines with an ellipsis.
 - The date sits at the bottom of the card.

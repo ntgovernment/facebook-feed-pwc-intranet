@@ -237,13 +237,13 @@ Update font family or sizes centrally:
 
 ### Responsive Breakpoints
 
-The feed is a single-column list at every width ([`src/styles/layout.css`](src/styles/layout.css)). Below 576px each card stacks its image above the text ([`src/styles/card.css`](src/styles/card.css)), and the pop-up goes full screen ([`src/styles/modal.css`](src/styles/modal.css)).
+The feed is a single-column list at every width ([`src/styles/layout.css`](src/styles/layout.css)), and each card shows its image above the text ([`src/styles/card.css`](src/styles/card.css)). Below 576px the pop-up goes full screen ([`src/styles/modal.css`](src/styles/modal.css)).
 
 ## Component Architecture
 
 ### Card Component ([`card.css`](src/styles/card.css))
 
-Cards follow the PWC "What's happening" news-item layout: image on the left, text on the right.
+Cards show a 200px image on top, with the text below styled like the PWC "What's happening" news items.
 
 Structure:
 

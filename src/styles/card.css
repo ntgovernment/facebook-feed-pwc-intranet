@@ -1,7 +1,7 @@
-/* Card Styles - news-item layout: image on the left, text on the right */
+/* Card Styles - image on top, text below */
 .fb-card {
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
   width: 100%;
   background: var(--clr-bg-default);
   box-shadow: var(--shadow-card);
@@ -16,8 +16,8 @@
 /* Image Section */
 .fb-card__image {
   position: relative;
-  flex: 0 0 31.5%;
-  min-height: 187px;
+  flex: 0 0 auto;
+  height: 200px;
   overflow: hidden;
   background: var(--dpsc-background-light);
   background-size: cover;
@@ -54,7 +54,7 @@
 
 /* Text Section */
 .fb-card__body {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -123,17 +123,4 @@ p.fb-card__description {
   font-size: 15px;
   line-height: 20px;
   text-transform: uppercase;
-}
-
-/* Small screens: stack the image above the text */
-@media (max-width: 575.98px) {
-  .fb-card {
-    flex-direction: column;
-  }
-
-  .fb-card__image {
-    flex: 0 0 auto;
-    height: 200px;
-    min-height: 0;
-  }
 }
