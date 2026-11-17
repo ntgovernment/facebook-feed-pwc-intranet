@@ -68,7 +68,6 @@
   --clr-news-title: #0f75bc;
   --clr-news-title-hover: #0b5a91;
   --clr-news-text: #333333;
-  --clr-news-divider: #1b6d84;
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.12);
 
   /* Typography */
@@ -182,11 +181,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 18px var(--spacing-md) 0 var(--spacing-lg);
+  padding: 14px var(--spacing-md) 0 20px;
 }
 
 .fb-card__text {
-  padding-bottom: 32px;
+  padding-bottom: var(--spacing-md);
 }
 
 h3.fb-card__title {
@@ -235,11 +234,10 @@ p.fb-card__description {
   word-wrap: break-word;
 }
 
-/* Footer: divider + date, pinned to the bottom of the card */
+/* Footer: date, pinned to the bottom of the card */
 .fb-card__footer {
   margin-top: auto;
-  padding: 18px 0;
-  border-top: 1px solid var(--clr-news-divider);
+  padding-bottom: 14px;
 }
 
 .fb-card__date {
@@ -248,29 +246,6 @@ p.fb-card__description {
   font-size: 15px;
   line-height: 20px;
   text-transform: uppercase;
-}
-
-/* Engagement icons (used by the post modal) */
-.fb-card__icon {
-  color: var(--clr-link-default);
-  flex-shrink: 0;
-  font-size: 16px;
-}
-
-.fb-card__icon--inactive {
-  color: var(--dpsc-text-light);
-}
-
-.fb-card__icon--flipped {
-  transform: scaleX(-1);
-}
-
-.fb-card__count {
-  color: var(--dpsc-text-light);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-family-base);
-  font-weight: 400;
-  line-height: var(--line-height-tight);
 }
 
 /* Small screens: stack the image above the text */
@@ -462,10 +437,6 @@ p.fb-card__description {
 }
 
 .fb-modal__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   padding: var(--spacing-lg) var(--spacing-xl) 0;
 }
@@ -473,19 +444,6 @@ p.fb-card__description {
 /* Without an image the close button sits over the header */
 .fb-modal--no-image .fb-modal__header {
   padding-top: 72px;
-}
-
-.fb-modal__engagement {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.fb-modal__stat {
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .fb-modal__date {
@@ -515,19 +473,6 @@ p.fb-card__description {
   justify-content: center;
   padding: var(--spacing-md) var(--spacing-xl);
   border-top: 1px solid var(--clr-border-subtle);
-}
-
-/* Visually hidden text for screen readers */
-.fb-sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 /* Responsive Modal */

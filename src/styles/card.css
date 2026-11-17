@@ -58,11 +58,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 18px var(--spacing-md) 0 var(--spacing-lg);
+  padding: 14px var(--spacing-md) 0 20px;
 }
 
 .fb-card__text {
-  padding-bottom: 32px;
+  padding-bottom: var(--spacing-md);
 }
 
 h3.fb-card__title {
@@ -111,11 +111,10 @@ p.fb-card__description {
   word-wrap: break-word;
 }
 
-/* Footer: divider + date, pinned to the bottom of the card */
+/* Footer: date, pinned to the bottom of the card */
 .fb-card__footer {
   margin-top: auto;
-  padding: 18px 0;
-  border-top: 1px solid var(--clr-news-divider);
+  padding-bottom: 14px;
 }
 
 .fb-card__date {
@@ -124,29 +123,6 @@ p.fb-card__description {
   font-size: 15px;
   line-height: 20px;
   text-transform: uppercase;
-}
-
-/* Engagement icons (used by the post modal) */
-.fb-card__icon {
-  color: var(--clr-link-default);
-  flex-shrink: 0;
-  font-size: 16px;
-}
-
-.fb-card__icon--inactive {
-  color: var(--dpsc-text-light);
-}
-
-.fb-card__icon--flipped {
-  transform: scaleX(-1);
-}
-
-.fb-card__count {
-  color: var(--dpsc-text-light);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-family-base);
-  font-weight: 400;
-  line-height: var(--line-height-tight);
 }
 
 /* Small screens: stack the image above the text */

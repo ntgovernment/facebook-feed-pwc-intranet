@@ -52,8 +52,6 @@ Semantic text color variables:
 --clr-text-default: #1f1e27; /* Default body text */
 ```
 
-The feed uses `--dpsc-text-light` for intentionally muted UI details such as engagement icons and counts.
-
 #### 5. UI Colors
 
 Background and border colors:
@@ -189,12 +187,6 @@ Entry point: [`src/styles.css`](src/styles.css) imports all modules.
 - Fancybox container variables (backdrop colour, slide padding) are overridden under `.fancybox__container.fb-fancybox` in [`modal.css`](src/styles/modal.css).
 - Fancybox's stylesheet sets `.fancybox__dialog *:empty { display: block }`; `modal.css` resets `<br>` inside the message body so line breaks render normally.
 
-## Engagement Icon Treatment
-
-Feed cards no longer show engagement icons. The post modal engagement row reuses the `.fb-card__icon` and `.fb-card__icon--inactive` classes from [src/styles/card.css](src/styles/card.css).
-
-`fb-card__icon--inactive` is not limited to zero-value states. In the current widget design it is also applied intentionally to like, comment, and share icons even when engagement counts are present, keeping those icons visually subdued while leaving the numeric counts readable.
-
 ## Customization Guide
 
 ### Changing the Color Scheme
@@ -264,13 +256,13 @@ article.fb-card                 (.fb-card--text when there is no image)
       │   ├─ h3.fb-card__title
       │   │   └─ a.fb-card__title-link      first line of the post (full)
       │   └─ p.fb-card__description         second line, clamped to 2 lines
-      └─ .fb-card__footer                   divider + date (uppercase)
+      └─ .fb-card__footer                   date (uppercase)
           └─ time.fb-card__date
 ```
 
 Uses variables:
 
-- Colors: `--clr-news-title`, `--clr-news-title-hover`, `--clr-news-text`, `--clr-news-divider`, `--clr-bg-default`, `--dpsc-background-light`
+- Colors: `--clr-news-title`, `--clr-news-title-hover`, `--clr-news-text`, `--clr-bg-default`, `--dpsc-background-light`
 - Spacing: `--spacing-md`, `--spacing-lg`, `--spacing-xs`
 - Typography: `--font-family-base`, `--font-size-lg`, `--line-height-base`
 - Shadows: `--shadow-card`, `--shadow-sm` (hover)
@@ -285,7 +277,6 @@ Structure (placed inside the Fancybox slide):
   ├─ .fb-modal__image            the post's single image (omitted when none)
   ├─ .fb-modal__scroll           scrolls when the post is long
   │   ├─ .fb-modal__header
-  │   │   ├─ .fb-modal__engagement
   │   │   └─ .fb-modal__date
   │   └─ .fb-modal__body          full post text, links and line breaks
   └─ .fb-modal__footer

@@ -16,11 +16,6 @@ function buildModalContent(post) {
   const formattedDate = formatDate(post.created_time);
   const imageUrl = getPostImageUrl(post);
 
-  // Get engagement stats
-  const likes = post.reactions?.summary?.total_count || 0;
-  const comments = post.comments?.summary?.total_count || 0;
-  const shares = post.shares?.count || 0;
-
   const permalink = post.permalink_url || "";
   const fullMessage = post.message || "No message available";
 
@@ -40,20 +35,6 @@ function buildModalContent(post) {
     }
     <div class="fb-modal__scroll">
       <div class="fb-modal__header">
-        <div class="fb-modal__engagement">
-          <div class="fb-modal__stat">
-            <i class="fal fa-thumbs-up fb-card__icon fb-card__icon--inactive" aria-hidden="true"></i>
-            ${likes > 0 ? `<span class="fb-card__count">${likes}<span class="fb-sr-only"> likes</span></span>` : ""}
-          </div>
-          <div class="fb-modal__stat">
-            <i class="fal fa-comment fb-card__icon fb-card__icon--flipped fb-card__icon--inactive" aria-hidden="true"></i>
-            ${comments > 0 ? `<span class="fb-card__count">${comments}<span class="fb-sr-only"> comments</span></span>` : ""}
-          </div>
-          <div class="fb-modal__stat">
-            <i class="fal fa-share fb-card__icon fb-card__icon--inactive" aria-hidden="true"></i>
-            ${shares > 0 ? `<span class="fb-card__count">${shares}<span class="fb-sr-only"> shares</span></span>` : ""}
-          </div>
-        </div>
         <div class="fb-modal__date" id="${id}-date">${formattedDate}</div>
       </div>
       <div class="fb-modal__body" id="${id}-body"></div>
