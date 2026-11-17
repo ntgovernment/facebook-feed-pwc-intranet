@@ -9,7 +9,7 @@ import { showPostModal } from "./modal.js";
 
 // Build a news-style card: optional image on the left, then the heading
 // (first line of the post), supporting text (second line, clamped to two
-// lines by CSS), and the date. Clicking anywhere on the card opens the post.
+// lines by CSS), and the date. Only the title opens the post.
 function createCard(post, { withImage }) {
   const { title, description } = extractContent(post.message);
   const formattedDate = formatDate(post.created_time);
@@ -40,9 +40,7 @@ function createCard(post, { withImage }) {
 
   const titleLink = card.querySelector(".fb-card__title-link");
 
-  // The title link is the keyboard/screen-reader target; the whole card is a
-  // larger mouse target that does the same thing.
-  card.addEventListener("click", (e) => {
+  titleLink.addEventListener("click", (e) => {
     e.preventDefault();
     showPostModal(post, titleLink);
   });

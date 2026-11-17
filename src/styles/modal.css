@@ -26,6 +26,14 @@
   box-shadow: var(--shadow-lg);
   font-family: var(--font-family-base);
   text-align: left;
+  cursor: default;
+}
+
+/* Only the close button, "View on Facebook" and links in the post text are
+   interactive */
+.fb-modal a[href],
+.fb-modal button {
+  cursor: pointer;
 }
 
 /* Image Section */

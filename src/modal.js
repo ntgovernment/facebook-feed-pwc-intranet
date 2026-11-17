@@ -70,6 +70,9 @@ export function showPostModal(post, triggeringElement = null) {
     triggerEl: triggeringElement || document.activeElement || undefined,
     Carousel: {
       Toolbar: false,
+      // No drag/swipe on the single slide: keeps the normal cursor and lets
+      // people select text.
+      gestures: false,
     },
     on: {
       ready: (instance) => {

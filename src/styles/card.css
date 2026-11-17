@@ -5,11 +5,11 @@
   width: 100%;
   background: var(--clr-bg-default);
   box-shadow: var(--shadow-card);
-  cursor: pointer;
   transition: box-shadow var(--transition-base);
 }
 
-.fb-card:hover {
+/* Hover state is triggered by the title only, not the rest of the card */
+.fb-card:has(.fb-card__title-link:hover) {
   box-shadow: var(--shadow-sm);
 }
 
@@ -82,7 +82,6 @@ h3.fb-card__title {
   word-wrap: break-word;
 }
 
-.fb-card:hover .fb-card__title-link,
 .fb-card__title-link:hover {
   color: var(--clr-news-title-hover);
 }

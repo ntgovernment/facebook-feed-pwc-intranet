@@ -265,7 +265,7 @@ Uses variables:
 - Colors: `--clr-news-title`, `--clr-news-title-hover`, `--clr-news-text`, `--clr-bg-default`, `--dpsc-background-light`
 - Spacing: `--spacing-md`, `--spacing-lg`, `--spacing-xs`
 - Typography: `--font-family-base`, `--font-size-lg`, `--line-height-base`
-- Shadows: `--shadow-card`, `--shadow-sm` (hover)
+- Shadows: `--shadow-card`, `--shadow-sm` (when the title is hovered)
 
 ### Modal Component ([`modal.css`](src/styles/modal.css))
 

@@ -93,13 +93,14 @@ Feed cards are shown in a single-column list, with text styled like the intranet
 
 Because the heading is the whole first line, posts read best when the first line is short.
 
-Clicking a card opens a pop-up with the full post and its image, so staff can read it without being prompted to log in to Facebook. The pop-up uses [Fancybox](https://fancyapps.com/fancybox/) (`@fancyapps/ui`), which is bundled into `bundle.js` and `styles.css`; the host page does not need Bootstrap or jQuery. Fancybox is commercially licensed software: confirm the licence covers this use.
+Clicking a card's title opens a pop-up with the full post and its image, so staff can read it without being prompted to log in to Facebook. The pop-up uses [Fancybox](https://fancyapps.com/fancybox/) (`@fancyapps/ui`), which is bundled into `bundle.js` and `styles.css`; the host page does not need Bootstrap or jQuery. Fancybox is commercially licensed software: confirm the licence covers this use.
 
 ### Card Interaction Behavior
 
-1. Clicking anywhere on a card, or activating its title link with the keyboard, opens the post pop-up.
+1. Clicking a card's title, or activating it with the keyboard, opens the post pop-up. The rest of the card (image, supporting text, date) is not clickable, and the card's hover state only appears when the title is hovered.
 2. The pop-up's "View on Facebook" button opens the post `permalink_url` in a new browser tab. The button is hidden when `permalink_url` is missing.
 3. The pop-up closes with its close button, `Escape`, or a click outside it. Focus returns to the card title.
+4. Inside the pop-up, only the close button, the "View on Facebook" button and links in the post text are clickable. The pop-up cannot be dragged, and the rest of it shows the normal arrow cursor.
 
 If API and fallback URL both fail and mock fallback is disabled, behavior is:
 
